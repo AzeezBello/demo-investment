@@ -80,7 +80,22 @@ export default function DashboardPage() {
 
     const cleanup = setupRealtime();
     return () => {
-      cleanup?.then(fn => fn());
+      // cleanup can be:
+      // - a synchronous function
+      // - a Promise that resolves to a function
+      // - undefined
+      if (typeof cleanup === 'function') {
+        cleanup();
+        return;
+      }
+      // If it's a Promise, call the resolved function if present
+      if (cleanup && typeof (cleanup as any).then === 'function') {
+        (cleanup as Promise<any>).then((fn: any) => {
+          if (typeof fn === 'function') fn();
+        }).catch(() => {
+          /* ignore cleanup errors */ 
+        });
+      }
     };
   }, []);
 
