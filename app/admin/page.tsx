@@ -12,6 +12,7 @@ interface Stats {
 }
 
 interface ChartData {
+  [key: string]: any;
   name: string;
   value: number;
 }
