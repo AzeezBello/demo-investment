@@ -25,15 +25,24 @@ export default function VerifyPage() {
   }, []);
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    if (!token) return setStatus('Invalid verification link');
+    // Read token and email from the URL search params (client-side)
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const email = params.get('email');
 
-    supabase.auth.verifyOtp({ type: 'signup', token })
+    if (!token || !email) {
+      setStatus('Invalid verification link');
+      return;
+    }
+
+    supabase.auth
+      .verifyOtp({ type: 'signup', token, email })
       .then(({ error }) => {
         if (error) setStatus('Verification failed');
         else setStatus('Email successfully verified!');
-      });
-  }, [searchParams]);
+      })
+      .catch(() => setStatus('Verification failed'));
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
