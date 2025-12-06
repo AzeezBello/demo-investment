@@ -4,7 +4,7 @@ export default function Section({
   title,
   children,
 }: {
-  title?: string | React.ReactNode;
+  title?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
