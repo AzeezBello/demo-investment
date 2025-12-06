@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import toast from 'react-hot-toast';
 
@@ -49,7 +49,7 @@ export default function ProfileSettingsPage() {
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async (e) => {
+  const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
     const { data: userData } = await supabase.auth.getUser();
