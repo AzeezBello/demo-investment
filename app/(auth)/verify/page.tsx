@@ -9,7 +9,11 @@ export default function VerifyPage() {
   const [status, setStatus] = useState('Verifying...');
 
   const checkUserRole = async (userId: string) => {
-    const { data: profile } = await supabase.from<{ role: string }>('profiles').select('role').eq('id', userId).single();
+    const { data: profile } = (await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single()) as { data: { role?: string } | null };
     if (profile?.role === 'admin') router.push('/admin');
     else router.push('/dashboard');
   };
