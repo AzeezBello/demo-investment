@@ -28,7 +28,7 @@ export default function NotificationsPage() {
     const { data, error } = (await supabase
       .from('notifications') // removed generic <Notification>
       .select('*')
-      .eq('user_id', profile.id)
+      .eq('user_id', (profile as any).id)
       .order('created_at', { ascending: false })) as { data: Notification[] | null; error: any };
 
     if (error) toast.error(error.message);
