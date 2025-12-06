@@ -4,8 +4,16 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import toast from 'react-hot-toast';
 
+interface UserProfile {
+  full_name?: string;
+  username?: string;
+  email?: string;
+  btc_address?: string;
+  // add other fields present in your profiles table as optional if needed
+}
+
 export default function ProfileSettingsPage() {
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -31,7 +39,7 @@ export default function ProfileSettingsPage() {
       toast.error('Failed to load profile');
       console.error(error);
     } else {
-      setProfile(data);
+      setProfile(data as UserProfile);
     }
     setLoading(false);
   };
