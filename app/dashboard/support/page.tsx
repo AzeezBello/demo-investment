@@ -27,11 +27,11 @@ export default function SupportPage() {
 
   const fetchTickets = async () => {
     if (!profile) return; // extra safety
-    const { data, error } = await supabase
-      .from<Ticket>('support_tickets')
+    const { data, error } = (await supabase
+      .from('support_tickets') // removed generic <Ticket>
       .select('*')
-      .eq('user_id', profile.id)
-      .order('created_at', { ascending: false });
+      .eq('user_id', (profile as any).id)
+      .order('created_at', { ascending: false })) as { data: Ticket[] | null; error: any };
 
     if (error) toast.error(error.message);
     else setTickets(data || []);
