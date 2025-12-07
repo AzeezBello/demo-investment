@@ -5,7 +5,35 @@ import { supabase } from '../../lib/supabaseClient';
 import { useUserData } from '../../lib/useUserData';
 import toast from 'react-hot-toast';
 
-interface Transaction {
+/* ──────────────────────────────
+   Raw Table Types From Supabase
+   ────────────────────────────── */
+
+interface DepositRow {
+  id: string;
+  amount: number;
+  status: string;
+  user_id: string;
+  created_at: string;
+}
+
+interface WithdrawalRow {
+  id: string;
+  amount: number;
+  status: string;
+  user_id: string;
+  created_at: string;
+}
+
+interface InvestmentRow {
+  id: string;
+  amount: number;
+  status: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface Transaction {
   id: string;
   type: 'Deposit' | 'Withdrawal' | 'Investment';
   amount: number;
@@ -17,38 +45,77 @@ const PAGE_SIZE = 10;
 
 export default function HistoryPage() {
   const { user } = useUserData();
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filtered, setFiltered] = useState<Transaction[]>([]);
-  const [filterType, setFilterType] = useState<'All' | 'Deposit' | 'Withdrawal' | 'Investment'>('All');
+  const [filterType, setFilterType] = useState<'All' | 'Deposit' | 'Withdrawal' | 'Investment'>(
+    'All'
+  );
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  /* ──────────────────────────────
+      FETCH HISTORY
+     ────────────────────────────── */
+
   const fetchHistory = async () => {
     if (!user?.id) return;
+
     setLoading(true);
 
     try {
-      const [{ data: deposits }, { data: withdrawals }, { data: investments }] = await Promise.all([
-        supabase.from('deposits').select('*').eq('user_id', user.id),
-        supabase.from('withdrawals').select('*').eq('user_id', user.id),
-        supabase.from('investments').select('*').eq('user_id', user.id),
-      ]);
+      const [{ data: deposits }, { data: withdrawals }, { data: investments }] =
+        await Promise.all([
+          supabase
+            .from('deposits')
+            .select('*')
+            .eq('user_id', user.id) as Promise<{ data: DepositRow[] | null }>,
 
+          supabase
+            .from('withdrawals')
+            .select('*')
+            .eq('user_id', user.id) as Promise<{ data: WithdrawalRow[] | null }>,
+
+          supabase
+            .from('investments')
+            .select('*')
+            .eq('user_id', user.id) as Promise<{ data: InvestmentRow[] | null }>,
+        ]);
+
+      /* Convert each table into unified Transaction format */
       const combined: Transaction[] = [
-        ...(deposits ?? []).map(d => ({ ...d, type: 'Deposit' })),
-        ...(withdrawals ?? []).map(w => ({ ...w, type: 'Withdrawal' })),
-        ...(investments ?? []).map(i => ({ ...i, type: 'Investment' })),
+        ...(deposits ?? []).map((d: DepositRow) => ({
+          ...d,
+          type: 'Deposit' as const,
+        })),
+        ...(withdrawals ?? []).map((w: WithdrawalRow) => ({
+          ...w,
+          type: 'Withdrawal' as const,
+        })),
+        ...(investments ?? []).map((i: InvestmentRow) => ({
+          ...i,
+          type: 'Investment' as const,
+        })),
       ];
 
-      combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      combined.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
       setTransactions(combined);
       setFiltered(combined);
-    } catch (err: any) {
-      toast.error('Failed to fetch transactions');
+
+    } catch (err) {
+      toast.error('Failed to fetch transactions.');
     } finally {
       setLoading(false);
     }
   };
+
+  /* ──────────────────────────────
+      LIVE UPDATES
+     ────────────────────────────── */
 
   useEffect(() => {
     fetchHistory();
@@ -57,17 +124,29 @@ export default function HistoryPage() {
 
     const depositsSub = supabase
       .channel(`public:deposits:user_id=eq.${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'deposits', filter: `user_id=eq.${user.id}` }, fetchHistory)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'deposits', filter: `user_id=eq.${user.id}` },
+        fetchHistory
+      )
       .subscribe();
 
     const withdrawalsSub = supabase
       .channel(`public:withdrawals:user_id=eq.${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'withdrawals', filter: `user_id=eq.${user.id}` }, fetchHistory)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'withdrawals', filter: `user_id=eq.${user.id}` },
+        fetchHistory
+      )
       .subscribe();
 
     const investmentsSub = supabase
       .channel(`public:investments:user_id=eq.${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'investments', filter: `user_id=eq.${user.id}` }, fetchHistory)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'investments', filter: `user_id=eq.${user.id}` },
+        fetchHistory
+      )
       .subscribe();
 
     return () => {
@@ -77,14 +156,20 @@ export default function HistoryPage() {
     };
   }, [user?.id]);
 
+  /* ──────────────────────────────
+      FILTERING
+     ────────────────────────────── */
+
   useEffect(() => {
-    if (filterType === 'All') {
-      setFiltered(transactions);
-    } else {
-      setFiltered(transactions.filter(tx => tx.type === filterType));
-    }
+    if (filterType === 'All') setFiltered(transactions);
+    else setFiltered(transactions.filter((tx) => tx.type === filterType));
+
     setPage(1);
   }, [filterType, transactions]);
+
+  /* ──────────────────────────────
+      UTILITIES
+     ────────────────────────────── */
 
   const getRowClass = (type: string) => {
     switch (type) {
@@ -112,9 +197,17 @@ export default function HistoryPage() {
     }
   };
 
+  /* ──────────────────────────────
+      PAGINATION
+     ────────────────────────────── */
+
   const startIdx = (page - 1) * PAGE_SIZE;
   const paginated = filtered.slice(startIdx, startIdx + PAGE_SIZE);
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+
+  /* ──────────────────────────────
+      RENDER
+     ────────────────────────────── */
 
   if (loading) return <p className="text-center mt-20">Loading transactions...</p>;
 
@@ -124,7 +217,7 @@ export default function HistoryPage() {
 
       {/* Filters */}
       <div className="flex gap-4 mb-4">
-        {['All', 'Deposit', 'Withdrawal', 'Investment'].map(type => (
+        {['All', 'Deposit', 'Withdrawal', 'Investment'].map((type) => (
           <button
             key={type}
             onClick={() => setFilterType(type as any)}
@@ -139,6 +232,7 @@ export default function HistoryPage() {
         ))}
       </div>
 
+      {/* Table */}
       {paginated.length === 0 ? (
         <p className="text-center text-gray-500">No transactions found.</p>
       ) : (
@@ -160,13 +254,20 @@ export default function HistoryPage() {
                 </th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-gray-200">
-              {paginated.map(tx => (
+              {paginated.map((tx) => (
                 <tr key={tx.id} className={`${getRowClass(tx.type)} transition-colors duration-200`}>
                   <td className="px-6 py-4 font-medium">{tx.type}</td>
-                  <td className="px-6 py-4 text-right font-semibold">${Number(tx.amount).toLocaleString()}</td>
+                  <td className="px-6 py-4 text-right font-semibold">
+                    ${Number(tx.amount).toLocaleString()}
+                  </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(tx.status)}`}>
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(
+                        tx.status
+                      )}`}
+                    >
                       {tx.status}
                     </span>
                   </td>
@@ -182,17 +283,19 @@ export default function HistoryPage() {
       {totalPages > 1 && (
         <div className="flex justify-center items-center mt-4 gap-4">
           <button
-            onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
             disabled={page === 1}
             className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
           >
             Prev
           </button>
+
           <span>
             Page {page} of {totalPages}
           </span>
+
           <button
-            onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={page === totalPages}
             className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
           >
