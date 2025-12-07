@@ -56,7 +56,7 @@ export default function AdminDepositsPage() {
         created_at: d.created_at,
       }));
 
-      const filtered = mapped.filter(d =>
+      const filtered = mapped.filter((d: any) =>
         d.user_email.toLowerCase().includes(search.toLowerCase())
       );
 
