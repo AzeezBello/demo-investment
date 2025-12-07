@@ -40,7 +40,7 @@ export default function AdminDepositsPage() {
         .select('id, user_id, amount, status, created_at')
         .order('created_at', { ascending: false });
 
-      const userIds = deposits?.map(d => d.user_id) || [];
+      const userIds = deposits?.map((d: any) => d.user_id) || [];
       const { data: users } = await supabase
         .from('profiles')
         .select('id, email')
