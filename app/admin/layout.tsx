@@ -55,7 +55,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         .order('created_at', { ascending: false });
       if (notifData) {
         setNotifications(notifData);
-        setUnreadCount(notifData.filter((n) => !n.read).length);
+        setUnreadCount(notifData.filter((n: any) => !n.read).length);
       }
 
       // Subscribe to real-time notifications (Supabase v2)
