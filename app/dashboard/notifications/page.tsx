@@ -13,6 +13,11 @@ interface Notification {
   created_at: string;
 }
 
+interface UserProfile {
+  id?: string;
+  // ...other profile fields...
+}
+
 export default function NotificationsPage() {
   const { profile, loading } = useUserData();
   const [notifications, setNotifications] = useState<Notification[]>([]);

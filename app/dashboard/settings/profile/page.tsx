@@ -5,6 +5,7 @@ import { supabase } from '../../../lib/supabaseClient';
 import toast from 'react-hot-toast';
 
 interface UserProfile {
+  id?: string;
   full_name?: string;
   username?: string;
   email?: string;
