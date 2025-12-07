@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -12,7 +12,7 @@ export default function SecuritySettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handlePasswordChange = async (e) => {
+  const handlePasswordChange = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       toast.error('Passwords do not match.');
