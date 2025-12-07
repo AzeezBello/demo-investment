@@ -4,6 +4,23 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import toast from 'react-hot-toast';
 
+/* ============================================
+   Types
+============================================ */
+
+interface RawInvestment {
+  id: string;
+  user_id: string;
+  amount: number;
+  roi: number;
+  created_at: string;
+}
+
+interface Profile {
+  id: string;
+  email: string;
+}
+
 interface Investment {
   id: string;
   user_email: string;
@@ -11,6 +28,10 @@ interface Investment {
   created_at: string;
   roi: number;
 }
+
+/* ============================================
+   Component
+============================================ */
 
 export default function AdminInvestmentsPage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
@@ -29,40 +50,67 @@ export default function AdminInvestmentsPage() {
     };
   }, [search]);
 
+  /* ============================================
+     Fetch Investments (Fully Typed)
+  ============================================ */
   const fetchInvestments = async () => {
     try {
-      const { data: investments } = await supabase
+      // Fetch investments
+      const { data: rawInvestments, error: invError } = (await supabase
         .from('investments')
         .select('id, user_id, amount, roi, created_at')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })) as {
+        data: RawInvestment[] | null;
+        error: any;
+      };
 
-      const userIds = investments?.map(i => i.user_id) || [];
-      const { data: users } = await supabase
+      if (invError) throw invError;
+
+      const investmentsList = rawInvestments || [];
+
+      // Extract user IDs
+      const userIds = investmentsList.map((i: RawInvestment) => i.user_id);
+
+      // Fetch user profiles
+      const { data: profiles, error: profileError } = (await supabase
         .from('profiles')
         .select('id, email')
-        .in('id', userIds);
+        .in('id', userIds)) as {
+        data: Profile[] | null;
+        error: any;
+      };
 
-      const emailMap: Record<string, string> = {};
-      users?.forEach(u => (emailMap[u.id] = u.email));
+      if (profileError) throw profileError;
 
-      const mapped = (investments || []).map(i => ({
+      const profileMap: Record<string, string> = {};
+      profiles?.forEach((u) => {
+        profileMap[u.id] = u.email;
+      });
+
+      // Combine and map final structure
+      const mapped: Investment[] = investmentsList.map((i) => ({
         id: i.id,
-        user_email: emailMap[i.user_id] || 'N/A',
+        user_email: profileMap[i.user_id] || 'N/A',
         amount: i.amount,
         roi: i.roi,
         created_at: i.created_at,
       }));
 
-      setInvestments(
-        mapped.filter(i =>
-          i.user_email.toLowerCase().includes(search.toLowerCase())
-        )
+      // Apply search filter
+      const filtered = mapped.filter((i) =>
+        i.user_email.toLowerCase().includes(search.toLowerCase())
       );
+
+      setInvestments(filtered);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load investments');
     }
   };
+
+  /* ============================================
+     Render
+  ============================================ */
 
   return (
     <div className="p-6">
@@ -72,7 +120,7 @@ export default function AdminInvestmentsPage() {
         placeholder="Search user email"
         className="border rounded px-4 py-2 w-full md:w-1/3 mb-4"
         value={search}
-        onChange={e => setSearch(e.target.value)}
+        onChange={(e) => setSearch(e.target.value)}
       />
 
       <div className="overflow-x-auto">
@@ -86,12 +134,18 @@ export default function AdminInvestmentsPage() {
             </tr>
           </thead>
           <tbody>
-            {investments.map(i => (
+            {investments.map((i) => (
               <tr key={i.id} className="border-b hover:bg-gray-50 transition">
                 <td className="px-4 py-2">{i.user_email}</td>
-                <td className="px-4 py-2 text-blue-600 font-semibold">${i.amount}</td>
-                <td className="px-4 py-2 text-green-700 font-semibold">{i.roi}%</td>
-                <td className="px-4 py-2">{new Date(i.created_at).toLocaleString()}</td>
+                <td className="px-4 py-2 text-blue-600 font-semibold">
+                  ${i.amount}
+                </td>
+                <td className="px-4 py-2 text-green-700 font-semibold">
+                  {i.roi}%
+                </td>
+                <td className="px-4 py-2">
+                  {new Date(i.created_at).toLocaleString()}
+                </td>
               </tr>
             ))}
           </tbody>
