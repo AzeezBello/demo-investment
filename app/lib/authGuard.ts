@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 export const authGuard = async (role: 'user' | 'admin') => {
-  const cookieStore = cookies();
+  const cookieStore = await cookies(); // cookies() is async here
   const token = cookieStore.get('sb:token')?.value;
 
   if (!token) redirect('/login');
