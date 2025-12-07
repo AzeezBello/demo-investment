@@ -13,6 +13,13 @@ interface Ticket {
   created_at: string;
 }
 
+interface UserProfile {
+  id?: string;
+  full_name?: string;
+  email?: string;
+  // ...other fields...
+}
+
 export default function SupportPage() {
   const { profile, loading } = useUserData();
   const [tickets, setTickets] = useState<Ticket[]>([]);
