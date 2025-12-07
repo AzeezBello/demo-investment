@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 
 export interface UserProfile {
-  full_name: string;
+  id?: string;
+  full_name?: string;
+  email?: string;
   balance: number;
   total_deposits: number;
   total_withdrawals: number;
