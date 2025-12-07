@@ -23,6 +23,14 @@ interface SidebarItem {
   icon: LucideIcon;
 }
 
+interface NotificationRow {
+  id: string;
+  user_id: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
 const sidebarItems: SidebarItem[] = [
   { name: 'Overview', href: '/dashboard', icon: Home },
   { name: 'Deposit', href: '/dashboard/deposit', icon: Vault },
@@ -38,11 +46,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userName, setUserName] = useState('User');
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<NotificationRow[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
-  // Fetch user profile and notifications
   useEffect(() => {
     const initDashboard = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -50,12 +57,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       const userId = userData.user.id;
 
-      // Fetch user's full name
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name')
         .eq('id', userId)
         .single();
+
       if (profile?.full_name) setUserName(profile.full_name);
 
       // Fetch initial notifications
@@ -63,13 +70,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         .from('notifications')
         .select('*')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as {
+        data: NotificationRow[] | null;
+      };
+
       if (notifData) {
         setNotifications(notifData);
-        setUnreadCount(notifData.filter((n) => !n.read).length);
+        setUnreadCount(notifData.filter((n: NotificationRow) => !n.read).length);
       }
 
-      // Subscribe to real-time notifications (Supabase v2)
+      // Realtime notifications
       const channel = supabase
         .channel('public:notifications')
         .on(
@@ -81,7 +91,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             filter: `user_id=eq.${userId}`,
           },
           (payload) => {
-            setNotifications((prev) => [payload.new, ...prev]);
+            const newNotif = payload.new as NotificationRow;
+            setNotifications((prev) => [newNotif, ...prev]);
             setUnreadCount((prev) => prev + 1);
           }
         )
@@ -100,13 +111,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     router.push('/login');
   };
 
-  const toggleNotifDropdown = () => setIsNotifOpen((prev) => !prev);
-
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-md">
-        {/* Brand Header */}
         <div className="px-6 py-3 border-b border-gray-800 hidden md:block">
           <h4 className="text-xl font-bold text-red-500">Profit Bridge</h4>
           <p className="text-sm text-gray-400">Dashboard</p>
@@ -130,40 +138,41 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </nav>
       </aside>
 
-      {/* Main Content */}
+      {/* Main */}
       <main className="flex-1 flex flex-col">
-        {/* Topbar */}
         <header className="flex justify-end items-center bg-white p-4 shadow relative space-x-4">
           {/* Notifications */}
           <div className="relative">
             <button
-              onClick={toggleNotifDropdown}
+              onClick={() => setIsNotifOpen((p) => !p)}
               className="relative p-2 rounded-full hover:bg-gray-100"
             >
               <Bell size={20} />
               {unreadCount > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                <span className="absolute top-0 right-0 px-2 py-1 text-xs font-bold text-white bg-red-600 rounded-full">
                   {unreadCount}
                 </span>
               )}
             </button>
+
             {isNotifOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-md py-2 z-50 max-h-96 overflow-y-auto">
-                {notifications.length === 0 && (
+                {notifications.length === 0 ? (
                   <p className="text-sm text-gray-500 text-center py-4">
                     No notifications
                   </p>
+                ) : (
+                  notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={`px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer ${
+                        !notif.read ? 'font-semibold' : ''
+                      }`}
+                    >
+                      {notif.message}
+                    </div>
+                  ))
                 )}
-                {notifications.map((notif) => (
-                  <div
-                    key={notif.id}
-                    className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 ${
-                      !notif.read ? 'font-semibold' : ''
-                    }`}
-                  >
-                    {notif.message}
-                  </div>
-                ))}
               </div>
             )}
           </div>
@@ -171,12 +180,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           {/* User Dropdown */}
           <div className="relative">
             <button
-              onClick={() => setIsDropdownOpen((prev) => !prev)}
+              onClick={() => setIsDropdownOpen((p) => !p)}
               className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full cursor-pointer"
             >
               <User size={20} />
               <span>{userName}</span>
             </button>
+
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-50">
                 <Link
@@ -202,7 +212,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        {/* Page content */}
         <div className="flex-1 p-6">{children}</div>
       </main>
     </div>
