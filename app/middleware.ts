@@ -19,7 +19,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const { data: profile } = await supabase.from<{ role: string }>('profiles').select('role').eq('id', user.id).single();
+  const { data: profile } = (await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()) as { data: { role?: string } | null };
 
   if (!profile) {
     url.pathname = '/login';
