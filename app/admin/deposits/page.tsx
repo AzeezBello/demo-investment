@@ -43,13 +43,12 @@ export default function AdminDepositsPage() {
       const userIds = deposits?.map((d: any) => d.user_id) || [];
       const { data: users } = await supabase
         .from('profiles')
-        .select('id, email')
-        .in('id', userIds);
+        .select('id, email');
 
       const emailMap: Record<string, string> = {};
-      users?.forEach(u => (emailMap[u.id] = u.email));
+      users?.forEach((u: any) => (emailMap[u.id] = u.email));
 
-      const mapped = (deposits || []).map(d => ({
+      const mapped = (deposits || []).map((d: any) => ({
         id: d.id,
         user_email: emailMap[d.user_id] || 'N/A',
         amount: d.amount,
