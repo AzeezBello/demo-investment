@@ -37,9 +37,13 @@ export default function SecuritySettingsPage() {
       setTimeout(() => {
         router.push('/login');
       }, 1500);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.message || 'Failed to change password.');
+      const message =
+        err instanceof Error
+          ? err.message
+          : String(err || 'Failed to change password.');
+      toast.error(message);
     } finally {
       setLoading(false);
     }
