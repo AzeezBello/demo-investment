@@ -51,6 +51,12 @@ export default function ProfileSettingsPage() {
 
   const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!profile) {
+      // Nothing to save
+      setSaving(false);
+      return;
+    }
+
     setSaving(true);
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
@@ -62,13 +68,11 @@ export default function ProfileSettingsPage() {
         username: profile.username,
         btc_address: profile.btc_address,
       })
-      .eq('id', userData.user.id);
+      .eq('id', userData?.user?.id);
 
-    if (error) {
-      toast.error('Failed to update profile');
-    } else {
-      toast.success('Profile updated successfully');
-    }
+    if (error) toast.error(error.message);
+    else toast.success('Profile updated.');
+
     setSaving(false);
   };
 
