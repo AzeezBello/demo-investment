@@ -4,6 +4,21 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import toast from 'react-hot-toast';
 
+/** Raw DB types returned by Supabase */
+interface RawWithdrawal {
+  id: string;
+  user_id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+}
+
+interface RawProfile {
+  id: string;
+  email: string;
+}
+
+/** Final withdrawal shape used in the UI */
 interface Withdrawal {
   id: string;
   user_email: string;
@@ -25,7 +40,11 @@ export default function AdminWithdrawalsPage() {
 
     const channel = supabase
       .channel('withdrawals-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'withdrawals' }, fetchWithdrawals)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'withdrawals' },
+        fetchWithdrawals
+      )
       .subscribe();
 
     return () => {
@@ -37,36 +56,53 @@ export default function AdminWithdrawalsPage() {
     try {
       setLoading(true);
 
-      const { data: withdrawals, error } = await supabase
+      // ---- 1. FETCH RAW WITHDRAWALS ----
+      const { data: rawWithdrawals, error } = await supabase
         .from('withdrawals')
         .select('id, user_id, amount, status, created_at')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as {
+        data: RawWithdrawal[] | null;
+        error: any;
+      };
 
       if (error) throw error;
 
-      const userIds = withdrawals?.map(w => w.user_id) || [];
+      const userIds =
+        rawWithdrawals?.map((w: RawWithdrawal) => w.user_id) || [];
 
+      // ---- 2. FETCH USER EMAILS ----
       const { data: users } = await supabase
         .from('profiles')
         .select('id, email')
-        .in('id', userIds);
+        .in('id', userIds) as { data: RawProfile[] | null };
 
+      // Build lookup table
       const emailMap: Record<string, string> = {};
-      users?.forEach(u => (emailMap[u.id] = u.email));
+      users?.forEach((u: RawProfile) => {
+        emailMap[u.id] = u.email;
+      });
 
-      const mapped = (withdrawals || []).map(w => ({
-        id: w.id,
-        user_email: emailMap[w.user_id] || 'N/A',
-        amount: w.amount,
-        status: w.status,
-        created_at: w.created_at,
-      }));
+      // ---- 3. MAP RAW RESULTS TO UI-FRIENDLY FORMAT ----
+      const mapped: Withdrawal[] =
+        rawWithdrawals?.map((w: RawWithdrawal) => ({
+          id: w.id,
+          user_email: emailMap[w.user_id] || 'N/A',
+          amount: w.amount,
+          status: w.status,
+          created_at: w.created_at,
+        })) || [];
 
-      const filtered = mapped.filter(w =>
+      // ---- 4. SEARCH FILTER ----
+      const filtered = mapped.filter((w: Withdrawal) =>
         w.user_email.toLowerCase().includes(search.toLowerCase())
       );
 
-      const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+      // ---- 5. PAGINATION ----
+      const paginated = filtered.slice(
+        (page - 1) * pageSize,
+        page * pageSize
+      );
+
       setWithdrawals(paginated);
     } catch (err) {
       console.error(err);
@@ -116,7 +152,7 @@ export default function AdminWithdrawalsPage() {
           placeholder="Search user email..."
           className="border rounded-lg px-4 py-2 w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-400"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
@@ -145,15 +181,19 @@ export default function AdminWithdrawalsPage() {
                 </td>
               </tr>
             ) : (
-              withdrawals.map(w => (
+              withdrawals.map((w: Withdrawal) => (
                 <tr key={w.id} className="border-b hover:bg-gray-50 transition">
                   <td className="px-4 py-3">{w.user_email}</td>
-                  <td className="px-4 py-3 text-red-600 font-semibold">${w.amount}</td>
+                  <td className="px-4 py-3 text-red-600 font-semibold">
+                    ${w.amount}
+                  </td>
                   <td className="px-4 py-3">
                     {editingId === w.id ? (
                       <select
                         value={w.status}
-                        onChange={e => updateStatus(w.id, e.target.value)}
+                        onChange={(e) =>
+                          updateStatus(w.id, e.target.value)
+                        }
                         className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                       >
                         <option value="pending">Pending</option>
@@ -177,7 +217,11 @@ export default function AdminWithdrawalsPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">
                     <button
-                      onClick={() => setEditingId(editingId === w.id ? null : w.id)}
+                      onClick={() =>
+                        setEditingId(
+                          editingId === w.id ? null : w.id
+                        )
+                      }
                       className="text-blue-600 hover:underline"
                     >
                       {editingId === w.id ? 'Cancel' : 'Edit'}
@@ -194,7 +238,7 @@ export default function AdminWithdrawalsPage() {
       <div className="mt-4 flex justify-between items-center text-sm">
         <button
           disabled={page === 1}
-          onClick={() => setPage(p => p - 1)}
+          onClick={() => setPage((p) => p - 1)}
           className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
         >
           Prev
@@ -202,7 +246,7 @@ export default function AdminWithdrawalsPage() {
         <span>Page {page}</span>
         <button
           disabled={withdrawals.length < pageSize}
-          onClick={() => setPage(p => p + 1)}
+          onClick={() => setPage((p) => p + 1)}
           className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
         >
           Next
