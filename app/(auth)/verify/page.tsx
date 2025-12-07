@@ -19,8 +19,8 @@ export default function VerifyPage() {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) checkUserRole(data.session.user.id);
+    supabase.auth.getSession().then((res: any) => {
+      if (res?.data?.session) checkUserRole(res.data.session.user.id);
     });
   }, []);
 
@@ -37,8 +37,8 @@ export default function VerifyPage() {
 
     supabase.auth
       .verifyOtp({ type: 'signup', token, email })
-      .then(({ error }) => {
-        if (error) setStatus('Verification failed');
+      .then((res: any) => {
+        if (res?.error) setStatus('Verification failed');
         else setStatus('Email successfully verified!');
       })
       .catch(() => setStatus('Verification failed'));

@@ -69,7 +69,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             table: 'notifications',
             filter: `user_id=eq.${userId}`,
           },
-          (payload) => {
+          (payload: any) => {
             setNotifications((prev) => [payload.new, ...prev]);
             setUnreadCount((prev) => prev + 1);
           }
@@ -130,14 +130,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                     No notifications
                   </p>
                 )}
-                {notifications.map((notif) => (
+                {notifications.map((n: any) => (
                   <div
-                    key={notif.id}
-                    className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 ${
-                      !notif.read ? 'font-semibold' : ''
-                    }`}
+                    key={n.id}
+                    className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 ${!n.read ? 'font-semibold' : ''}`}
                   >
-                    {notif.message}
+                    {n.message}
                   </div>
                 ))}
               </div>

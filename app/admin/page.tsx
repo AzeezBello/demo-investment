@@ -37,15 +37,18 @@ export default function AdminOverviewPage() {
 
         // Deposits
         const { data: deposits } = await supabase.from('deposits').select('amount, created_at');
-        const totalDeposits = deposits?.reduce((acc, d) => acc + Number(d.amount), 0) || 0;
+        const depositsArr: any[] = deposits || [];
+        const totalDeposits = depositsArr.reduce((acc: number, d: any) => acc + Number(d.amount), 0);
 
         // Withdrawals
         const { data: withdrawals } = await supabase.from('withdrawals').select('amount, created_at');
-        const totalWithdrawals = withdrawals?.reduce((acc, w) => acc + Number(w.amount), 0) || 0;
+        const withdrawalsArr: any[] = withdrawals || [];
+        const totalWithdrawals = withdrawalsArr.reduce((acc: number, w: any) => acc + Number(w.amount), 0);
 
         // Investments
         const { data: investments } = await supabase.from('investments').select('amount, created_at');
-        const totalInvestments = investments?.reduce((acc, i) => acc + Number(i.amount), 0) || 0;
+        const investmentsArr: any[] = investments || [];
+        const totalInvestments = investmentsArr.reduce((acc: number, i: any) => acc + Number(i.amount), 0);
 
         setStats({
           totalUsers: userCount || 0,
@@ -57,16 +60,16 @@ export default function AdminOverviewPage() {
         // Prepare chart data (monthly aggregation)
         const groupByMonth = (data: any[]) => {
           const months: Record<string, number> = {};
-          data.forEach(d => {
+          data.forEach((d: any) => {
             const month = new Date(d.created_at).toLocaleString('default', { month: 'short', year: 'numeric' });
             months[month] = (months[month] || 0) + Number(d.amount);
           });
           return Object.entries(months).map(([name, value]) => ({ name, value }));
         };
 
-        setDepositHistory(groupByMonth(deposits || []));
-        setWithdrawalHistory(groupByMonth(withdrawals || []));
-        setInvestmentHistory(groupByMonth(investments || []));
+        setDepositHistory(groupByMonth(depositsArr));
+        setWithdrawalHistory(groupByMonth(withdrawalsArr));
+        setInvestmentHistory(groupByMonth(investmentsArr));
       } catch (error) {
         console.error('Error fetching analytics:', error);
       }

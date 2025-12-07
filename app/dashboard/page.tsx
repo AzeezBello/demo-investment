@@ -44,7 +44,7 @@ export default function DashboardPage() {
       .select('amount')
       .eq('user_id', userId);
 
-    const total_investments = investments?.reduce((sum, inv) => sum + Number(inv.amount), 0) || 0;
+    const total_investments = investments?.reduce((sum: number, inv: any) => sum + Number(inv.amount), 0) || 0;
 
     setProfile({
       full_name: profileData.full_name,

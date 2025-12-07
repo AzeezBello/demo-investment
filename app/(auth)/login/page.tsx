@@ -19,8 +19,8 @@ export default function LoginPage() {
 
   // ✅ Redirect if already logged in
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) checkUserRole(data.session.user.id);
+    supabase.auth.getSession().then((res: any) => {
+      if (res?.data?.session) checkUserRole(res.data.session.user.id);
     });
   }, []);
 

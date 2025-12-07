@@ -22,9 +22,9 @@ export default function RegisterPage() {
   
     // Redirect if user is already logged in
   useEffect(() => {
-    const session = supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        checkUserRole(data.session.user.id);
+    supabase.auth.getSession().then((res: any) => {
+      if (res?.data?.session) {
+        checkUserRole(res.data.session.user.id);
       }
     });
   }, []);

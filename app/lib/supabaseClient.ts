@@ -1,7 +1,10 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+// Prefer the standard anon key but accept the publishable default key name used by your Supabase project
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const SUPABASE_ANON_KEY =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
 
 /**
  * During build/prerender the env vars might not be available.
@@ -13,11 +16,9 @@ let supabase: SupabaseClient | any;
 if (SUPABASE_URL && SUPABASE_ANON_KEY) {
   supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } else {
-  // Minimal stub to avoid runtime import errors during prerender/build.
-  // Throws when any commonly used method is invoked, with clear guidance.
   const makeError = () =>
     new Error(
-      'Supabase client not initialized. Ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set for build/runtime, or guard Supabase usage to client-side code.'
+      'Supabase client not initialized. Ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY are set.'
     );
 
   const thrower = () => {

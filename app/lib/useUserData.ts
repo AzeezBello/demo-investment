@@ -63,7 +63,7 @@ export function useUserData() {
         if (pendingError) throw pendingError;
 
         const pending_withdrawals =
-          pendingWithdrawalsData?.reduce((sum, w: any) => sum + Number(w.amount), 0) || 0;
+          pendingWithdrawalsData?.reduce((sum: number, w: any) => sum + Number(w.amount), 0) || 0;
 
         if (mounted) {
           setProfile({

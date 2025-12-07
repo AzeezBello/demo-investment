@@ -1,0 +1,16 @@
+{
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_SUPABASE_URL": "@demo-investment-supabase-url",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@demo-investment-supabase-anon-key",
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY": "@demo-investment-supabase-anon-key",
+      "SUPABASE_SERVICE_ROLE_KEY": "@demo-investment-service-role-key"
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@demo-investment-supabase-url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@demo-investment-supabase-anon-key",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY": "@demo-investment-supabase-anon-key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@demo-investment-service-role-key"
+  }
+}
