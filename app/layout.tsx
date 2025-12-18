@@ -10,8 +10,8 @@ const inter = localFont({
 });
 
 export const metadata = {
-  title: 'ProfitBridge',
-  description: 'Your bridge to smarter investments.',
+  title: 'Demo-Investment - Smart Investment Platform',
+  description: 'Demo-Investment is a cutting-edge investment platform designed for modern investors seeking secure, transparent, and profitable opportunities. Join us to take control of your financial future with innovative tools and insights.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
