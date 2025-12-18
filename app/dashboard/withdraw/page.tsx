@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { SummaryCard, TransactionForm } from '../../components/dashboard/DashboardCards';
 
+interface WithdrawalRow {
+  amount: number;
+  status: string | null;
+}
+
 export default function WithdrawPage() {
   const [amount, setAmount] = useState<string>('');
   const [walletAddress, setWalletAddress] = useState<string>('');
@@ -39,14 +44,14 @@ export default function WithdrawPage() {
         setBalance(profile?.balance || 0);
 
         // Fetch pending withdrawals
-        const { data: withdrawals } = await supabase
+        const { data: withdrawals } = (await supabase
           .from('withdrawals')
           .select('amount, status')
-          .eq('user_id', userId);
+          .eq('user_id', userId)) as { data: WithdrawalRow[] | null };
 
         const pendingTotal =
-          withdrawals
-            ?.filter((w) => w.status === 'processing')
+          (withdrawals ?? [])
+            .filter((w) => w.status === 'processing')
             .reduce((sum, w) => sum + w.amount, 0) || 0;
 
         setPendingWithdrawals(pendingTotal);
