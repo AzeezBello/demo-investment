@@ -3,6 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import type { RealtimePostgresInsertPayload } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import {
   LucideIcon,
@@ -51,9 +52,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
   useEffect(() => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let isMounted = true;
+
     const initDashboard = async () => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
+      if (!userData.user || !isMounted) return;
 
       const userId = userData.user.id;
 
@@ -63,6 +67,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         .eq('id', userId)
         .single();
 
+      if (!isMounted) return;
       if (profile?.full_name) setUserName(profile.full_name);
 
       // Fetch initial notifications
@@ -74,13 +79,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         data: NotificationRow[] | null;
       };
 
+      if (!isMounted) return;
       if (notifData) {
         setNotifications(notifData);
         setUnreadCount(notifData.filter((n: NotificationRow) => !n.read).length);
       }
 
       // Realtime notifications
-      const channel = supabase
+      if (!isMounted) return;
+      channel = supabase
         .channel('public:notifications')
         .on(
           'postgres_changes',
@@ -90,20 +97,24 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             table: 'notifications',
             filter: `user_id=eq.${userId}`,
           },
-          (payload) => {
-            const newNotif = payload.new as NotificationRow;
+          (payload: RealtimePostgresInsertPayload<NotificationRow>) => {
+            if (!isMounted) return;
+            const newNotif = payload.new;
             setNotifications((prev) => [newNotif, ...prev]);
             setUnreadCount((prev) => prev + 1);
           }
         )
         .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     };
 
-    initDashboard();
+    void initDashboard();
+
+    return () => {
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, []);
 
   const handleLogout = async () => {

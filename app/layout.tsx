@@ -1,8 +1,13 @@
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
-import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = localFont({
+  src: '../public/fonts/Inter-VariableFont_slnt,wght.ttf',
+  display: 'swap',
+  weight: '100 900',
+  style: 'normal',
+});
 
 export const metadata = {
   title: 'ProfitBridge',

@@ -33,9 +33,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   // Fetch user profile and notifications
   useEffect(() => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let isMounted = true;
+
     const initDashboard = async () => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
+      if (!userData.user || !isMounted) return;
 
       const userId = userData.user.id;
 
@@ -45,6 +48,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         .select('full_name')
         .eq('id', userId)
         .single();
+      if (!isMounted) return;
       if (profile?.full_name) setUserName(profile.full_name);
 
       // Fetch initial notifications
@@ -53,13 +57,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
+      if (!isMounted) return;
       if (notifData) {
         setNotifications(notifData);
         setUnreadCount(notifData.filter((n: any) => !n.read).length);
       }
 
       // Subscribe to real-time notifications (Supabase v2)
-      const channel = supabase
+      if (!isMounted) return;
+      channel = supabase
         .channel('public:notifications')
         .on(
           'postgres_changes',
@@ -70,18 +76,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             filter: `user_id=eq.${userId}`,
           },
           (payload: any) => {
+            if (!isMounted) return;
             setNotifications((prev) => [payload.new, ...prev]);
             setUnreadCount((prev) => prev + 1);
           }
         )
         .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     };
 
-    initDashboard();
+    void initDashboard();
+
+    return () => {
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, []);
 
   const handleLogout = async () => {
