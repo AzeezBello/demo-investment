@@ -1,20 +1,27 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import toast from 'react-hot-toast';
 
 export default function ConfirmDepositPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const amountParam = searchParams.get('amount') || '0';
-  const currency = searchParams.get('currency') || 'Bitcoin';
-  const [amount, setAmount] = useState(parseFloat(amountParam));
+  const [amount, setAmount] = useState(0);
+  const [currency, setCurrency] = useState('Bitcoin');
   const [transactionId, setTransactionId] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
   const depositFee = 0.0; // 0% fee
   const debitAmount = amount + amount * depositFee;
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const amountParam = params.get('amount') || '0';
+    const parsedAmount = parseFloat(amountParam);
+    setAmount(Number.isFinite(parsedAmount) ? parsedAmount : 0);
+    const currencyParam = params.get('currency');
+    if (currencyParam) setCurrency(currencyParam);
+  }, []);
 
   // Fetch user ID
   useEffect(() => {
