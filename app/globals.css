@@ -1,8 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --muted: #475569;
+  --border: #e2e8f0;
+  --accent: #b91c1c;
+  --accent-strong: #991b1b;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme='dark'] {
+  --background: #0b1220;
+  --foreground: #e2e8f0;
+  --surface: #111827;
+  --muted: #94a3b8;
+  --border: #1f2937;
+  --accent: #f97316;
+  --accent-strong: #ea580c;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -12,17 +30,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 /* ==========================================
@@ -40,15 +52,27 @@ a {
 }
 
 a:hover {
-  @apply text-[--color-primary];
+  color: var(--accent);
 }
 
 .btn-primary {
-  @apply bg-[--color-primary] text-white px-6 py-3 rounded-md font-semibold shadow-sm hover:bg-[--color-accent] transition-all duration-200;
+  @apply text-white px-6 py-3 rounded-md font-semibold shadow-sm transition-all duration-200;
+  background: var(--accent);
+}
+
+.btn-primary:hover {
+  background: var(--accent-strong);
 }
 
 .btn-outline {
-  @apply border border-[--color-primary] text-[--color-primary] px-6 py-3 rounded-md hover:bg-[--color-primary] hover:text-white transition-all duration-200;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  @apply px-6 py-3 rounded-md transition-all duration-200;
+}
+
+.btn-outline:hover {
+  background: var(--accent);
+  color: #fff;
 }
 
 /* ==========================================
@@ -57,7 +81,10 @@ a:hover {
 input,
 textarea,
 select {
-  @apply w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[--color-primary] focus:border-[--color-primary] transition;
+  @apply w-full rounded-md p-3 focus:outline-none transition;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
 }
 
 label {
@@ -65,22 +92,54 @@ label {
 }
 
 /* ==========================================
-   Dark Mode (System Preference)
+   Light/Dark overrides for utility classes
    ========================================== */
-@media (prefers-color-scheme: dark) {
-  html,
-  body {
-    @apply bg-[--color-dark] text-gray-100;
-  }
-
-  input,
-  textarea,
-  select {
-    @apply bg-[--color-secondary] border-gray-700 text-white;
-  }
-
-  .btn-primary {
-    @apply bg-[--color-accent] hover:bg-red-800;
-  }
+[data-theme='dark'] .bg-white {
+  background-color: var(--surface) !important;
 }
 
+[data-theme='dark'] .bg-gray-50 {
+  background-color: #0f172a !important;
+}
+
+[data-theme='dark'] .bg-gray-100 {
+  background-color: #111827 !important;
+}
+
+[data-theme='dark'] .text-gray-900,
+[data-theme='dark'] .text-gray-800,
+[data-theme='dark'] .text-gray-700,
+[data-theme='dark'] .text-black {
+  color: var(--foreground) !important;
+}
+
+[data-theme='dark'] .text-gray-600,
+[data-theme='dark'] .text-gray-500,
+[data-theme='dark'] .text-gray-400 {
+  color: var(--muted) !important;
+}
+
+[data-theme='dark'] .border-gray-200,
+[data-theme='dark'] .border-gray-300,
+[data-theme='dark'] .border {
+  border-color: var(--border) !important;
+}
+
+[data-theme='dark'] .shadow,
+[data-theme='dark'] .shadow-md,
+[data-theme='dark'] .shadow-lg,
+[data-theme='dark'] .shadow-xl {
+  box-shadow: var(--shadow) !important;
+}
+
+[data-theme='dark'] input,
+[data-theme='dark'] textarea,
+[data-theme='dark'] select {
+  background: #0f172a;
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+[data-theme='dark'] table {
+  color: var(--foreground);
+}

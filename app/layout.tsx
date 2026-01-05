@@ -1,6 +1,8 @@
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import localFont from 'next/font/local';
+import { ThemeProvider } from './components/ThemeProvider';
+import ThemeToggle from './components/ThemeToggle';
 
 const inter = localFont({
   src: '../public/fonts/Inter-VariableFont_slnt,wght.ttf',
@@ -17,9 +19,12 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-50 text-gray-900 min-h-screen`}> 
-        <Toaster position="top-right" />
-        {children}
+      <body className={`${inter.className} min-h-screen`}>
+        <ThemeProvider>
+          <Toaster position="top-right" />
+          <ThemeToggle />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
