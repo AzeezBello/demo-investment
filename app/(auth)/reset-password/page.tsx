@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -54,6 +56,7 @@ export default function ResetPasswordPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
+      <Header />
       <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
         <h1 className="text-3xl font-bold text-center text-red-700 mb-2">
           Reset Password
@@ -129,6 +132,7 @@ export default function ResetPasswordPage() {
           </Link>
         </div>
       </div>
+      <Footer />
     </main>
   );
 }

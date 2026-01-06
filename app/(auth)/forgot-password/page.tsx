@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import Link from 'next/link';
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -38,6 +40,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
+      <Header />
       <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
         <h1 className="text-3xl font-bold text-center text-red-700 mb-2">
           Forgot Password
@@ -95,6 +98,7 @@ export default function ForgotPasswordPage() {
           </Link>
         </div>
       </div>
+      <Footer />
     </main>
   );
 }
