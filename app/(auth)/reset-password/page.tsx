@@ -55,81 +55,83 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
+    <main>
       <Header />
-      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
-        <h1 className="text-3xl font-bold text-center text-red-700 mb-2">
-          Reset Password
-        </h1>
-        <p className="text-center text-gray-600 mb-8">
-          Enter and confirm your new password below.
-        </p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
+        <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+          <h1 className="text-3xl font-bold text-center text-red-700 mb-2">
+            Reset Password
+          </h1>
+          <p className="text-center text-gray-600 mb-8">
+            Enter and confirm your new password below.
+          </p>
 
-        <form onSubmit={handleResetPassword} className="space-y-5">
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
+          <form onSubmit={handleResetPassword} className="space-y-5">
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                New Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-red-600 focus:outline-none"
+                placeholder="Enter new password"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Confirm New Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                name="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="w-full border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-red-600 focus:outline-none"
+                placeholder="Confirm new password"
+              />
+            </div>
+
+            {errorMsg && (
+              <p className="text-red-600 text-sm bg-red-50 border border-red-200 p-2 rounded-md">
+                {errorMsg}
+              </p>
+            )}
+            {successMsg && (
+              <p className="text-green-600 text-sm bg-green-50 border border-green-200 p-2 rounded-md">
+                {successMsg}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-3 rounded-md text-white font-semibold transition-all ${
+                loading ? 'bg-red-400 cursor-not-allowed' : 'bg-red-700 hover:bg-red-800'
+              }`}
             >
-              New Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-red-600 focus:outline-none"
-              placeholder="Enter new password"
-            />
+              {loading ? 'Updating...' : 'Update Password'}
+            </button>
+          </form>
+
+          <div className="mt-6 text-sm text-center text-gray-600">
+            <Link href="/login" className="text-red-700 font-medium hover:underline">
+              Back to Login
+            </Link>
           </div>
-
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Confirm New Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              name="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-red-600 focus:outline-none"
-              placeholder="Confirm new password"
-            />
-          </div>
-
-          {errorMsg && (
-            <p className="text-red-600 text-sm bg-red-50 border border-red-200 p-2 rounded-md">
-              {errorMsg}
-            </p>
-          )}
-          {successMsg && (
-            <p className="text-green-600 text-sm bg-green-50 border border-green-200 p-2 rounded-md">
-              {successMsg}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 rounded-md text-white font-semibold transition-all ${
-              loading ? 'bg-red-400 cursor-not-allowed' : 'bg-red-700 hover:bg-red-800'
-            }`}
-          >
-            {loading ? 'Updating...' : 'Update Password'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-sm text-center text-gray-600">
-          <Link href="/login" className="text-red-700 font-medium hover:underline">
-            Back to Login
-          </Link>
         </div>
       </div>
       <Footer />

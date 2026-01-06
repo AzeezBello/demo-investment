@@ -141,74 +141,76 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
+    <main>
       <Header />
-      <div className="w-full max-w-lg bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
-        <h1 className="text-3xl font-bold text-center text-red-700 mb-2">
-          Create Your Account
-        </h1>
-        <p className="text-center text-gray-600 mb-8">
-          Join{" "}
-          <span className="text-red-700 font-semibold">
-            Demo-Investment
-          </span>{" "}
-          and start your journey today.
-        </p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
+        <div className="w-full max-w-lg bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+          <h1 className="text-3xl font-bold text-center text-red-700 mb-2">
+            Create Your Account
+          </h1>
+          <p className="text-center text-gray-600 mb-8">
+            Join{" "}
+            <span className="text-red-700 font-semibold">
+              Demo-Investment
+            </span>{" "}
+            and start your journey today.
+          </p>
 
-        <form onSubmit={handleRegister} className="space-y-5">
-          <InputField label="Full Name" name="fullName" value={form.fullName} onChange={handleChange} />
-          <InputField label="Username" name="username" value={form.username} onChange={handleChange} />
-          <InputField label="Email Address" name="email" type="email" value={form.email} onChange={handleChange} />
-          <InputField label="Bitcoin Wallet Address" name="btcAddress" value={form.btcAddress} onChange={handleChange} />
-          <InputField label="Password" name="password" type="password" value={form.password} onChange={handleChange} />
-          <InputField label="Confirm Password" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} />
-          <InputField label="Secret Question" name="secretQuestion" value={form.secretQuestion} onChange={handleChange} />
-          <InputField label="Secret Answer" name="secretAnswer" value={form.secretAnswer} onChange={handleChange} />
+          <form onSubmit={handleRegister} className="space-y-5">
+            <InputField label="Full Name" name="fullName" value={form.fullName} onChange={handleChange} />
+            <InputField label="Username" name="username" value={form.username} onChange={handleChange} />
+            <InputField label="Email Address" name="email" type="email" value={form.email} onChange={handleChange} />
+            <InputField label="Bitcoin Wallet Address" name="btcAddress" value={form.btcAddress} onChange={handleChange} />
+            <InputField label="Password" name="password" type="password" value={form.password} onChange={handleChange} />
+            <InputField label="Confirm Password" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} />
+            <InputField label="Secret Question" name="secretQuestion" value={form.secretQuestion} onChange={handleChange} />
+            <InputField label="Secret Answer" name="secretAnswer" value={form.secretAnswer} onChange={handleChange} />
 
-          <div className="flex items-start space-x-2">
-            <input
-              type="checkbox"
-              name="agree"
-              checked={form.agree}
-              onChange={handleChange}
-              className="mt-1"
-            />
-            <label className="text-sm text-gray-700">
-              I have read and agree with the{" "}
-              <Link href="/terms" className="text-red-700 hover:underline">
-                Terms and Conditions
-              </Link>
-              .
-            </label>
+            <div className="flex items-start space-x-2">
+              <input
+                type="checkbox"
+                name="agree"
+                checked={form.agree}
+                onChange={handleChange}
+                className="mt-1"
+              />
+              <label className="text-sm text-gray-700">
+                I have read and agree with the{" "}
+                <Link href="/terms" className="text-red-700 hover:underline">
+                  Terms and Conditions
+                </Link>
+                .
+              </label>
+            </div>
+
+            {errorMsg && (
+              <p className="text-red-600 text-sm bg-red-50 border border-red-200 p-2 rounded-md">
+                {errorMsg}
+              </p>
+            )}
+            {successMsg && (
+              <p className="text-green-600 text-sm bg-green-50 border border-green-200 p-2 rounded-md">
+                {successMsg}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-3 rounded-md text-white font-semibold transition-all ${
+                loading ? "bg-red-400 cursor-not-allowed" : "bg-red-700 hover:bg-red-800"
+              }`}
+            >
+              {loading ? "Registering..." : "Register"}
+            </button>
+          </form>
+
+          <div className="mt-6 text-sm text-center text-gray-600">
+            Already have an account?{" "}
+            <Link href="/login" className="text-red-700 font-medium hover:underline">
+              Login
+            </Link>
           </div>
-
-          {errorMsg && (
-            <p className="text-red-600 text-sm bg-red-50 border border-red-200 p-2 rounded-md">
-              {errorMsg}
-            </p>
-          )}
-          {successMsg && (
-            <p className="text-green-600 text-sm bg-green-50 border border-green-200 p-2 rounded-md">
-              {successMsg}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 rounded-md text-white font-semibold transition-all ${
-              loading ? "bg-red-400 cursor-not-allowed" : "bg-red-700 hover:bg-red-800"
-            }`}
-          >
-            {loading ? "Registering..." : "Register"}
-          </button>
-        </form>
-
-        <div className="mt-6 text-sm text-center text-gray-600">
-          Already have an account?{" "}
-          <Link href="/login" className="text-red-700 font-medium hover:underline">
-            Login
-          </Link>
         </div>
       </div>
       <Footer />

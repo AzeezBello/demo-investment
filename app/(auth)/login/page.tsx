@@ -70,66 +70,68 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
+    <main>
       <Header />
-      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
-        <h1 className="text-3xl font-bold text-center text-red-700 mb-2">
-          Welcome Back
-        </h1>
-        <p className="text-center text-gray-600 mb-8">
-          Log in to your{' '}
-          <span className="text-red-700 font-semibold">Demo-Investment</span> account
-        </p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
+        <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+          <h1 className="text-3xl font-bold text-center text-red-700 mb-2">
+            Welcome Back
+          </h1>
+          <p className="text-center text-gray-600 mb-8">
+            Log in to your{' '}
+            <span className="text-red-700 font-semibold">Demo-Investment</span> account
+          </p>
 
-        <form onSubmit={handleLogin} className="space-y-5">
-          <InputField
-            label="Email Address"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-          />
-          <InputField
-            label="Password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-          />
+          <form onSubmit={handleLogin} className="space-y-5">
+            <InputField
+              label="Email Address"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+            />
+            <InputField
+              label="Password"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+            />
 
-          {errorMsg && (
-            <p className="text-red-600 text-sm bg-red-50 border border-red-200 p-2 rounded-md">
-              {errorMsg}
-            </p>
-          )}
-          {successMsg && (
-            <p className="text-green-600 text-sm bg-green-50 border border-green-200 p-2 rounded-md">
-              {successMsg}
-            </p>
-          )}
+            {errorMsg && (
+              <p className="text-red-600 text-sm bg-red-50 border border-red-200 p-2 rounded-md">
+                {errorMsg}
+              </p>
+            )}
+            {successMsg && (
+              <p className="text-green-600 text-sm bg-green-50 border border-green-200 p-2 rounded-md">
+                {successMsg}
+              </p>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 rounded-md text-white font-semibold transition-all ${
-              loading ? 'bg-red-400 cursor-not-allowed' : 'bg-red-700 hover:bg-red-800'
-            }`}
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-3 rounded-md text-white font-semibold transition-all ${
+                loading ? 'bg-red-400 cursor-not-allowed' : 'bg-red-700 hover:bg-red-800'
+              }`}
+            >
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
 
-        <div className="mt-6 text-sm text-center text-gray-600">
-          Don’t have an account?{' '}
-          <Link href="/register" className="text-red-700 font-medium hover:underline">
-            Register
-          </Link>
-        </div>
+          <div className="mt-6 text-sm text-center text-gray-600">
+            Don’t have an account?{' '}
+            <Link href="/register" className="text-red-700 font-medium hover:underline">
+              Register
+            </Link>
+          </div>
 
-        <div className="mt-4 text-sm text-center">
-          <Link href="/reset-password" className="text-gray-500 hover:text-red-700">
-            Forgot Password?
-          </Link>
+          <div className="mt-4 text-sm text-center">
+            <Link href="/reset-password" className="text-gray-500 hover:text-red-700">
+              Forgot Password?
+            </Link>
+          </div>
         </div>
       </div>
       <Footer />
